@@ -2,17 +2,19 @@ from cv2 import cv2
 import numpy as np
 import pyautogui
 import tkinter as tk
+import threading
 
-keepRecording = False;
+keepRecording = False
 frames = []
 
-def recordScreen(FPS):
-    screenShots = []
+def _recordScreen():
+    global frames
+    frames = []
     while keepRecording == True:
         img = pyautogui.screenshot()
-        screenShots.append(img)
-    return screenShots
-
+        frames.append(img)
+def recordScreen():
+    threading.Thread(target=_recordScreen).start()
 def convertScreenShots(screenShots):
     converted = []
     for i in range(len(screenShots)):
@@ -26,16 +28,31 @@ def outputVideo(output, screenShots):
         output.write(screenShots[i])
 
 def startRecording():
-    FPS = fpsSettings.get();
-    #window.iconify()
-    keepRecording = True;
-    #output = cv2.VideoWriter("output.avi",fourcc, FPS, (SCREEN_SIZE))
-    frames = recordScreen(FPS)
+    global keepRecording, FPS
+    btnStartRecording["state"] = "disabled"
+    btnStopRecording["state"] = "normal"
+    FPS = fpsSettings.get()
+    window.iconify()
+    keepRecording = True
+    recordScreen()
 
+def stopRecording():
+    global keepRecording, FPS, SCREEN_SIZE
+    keepRecording = False
+    btnStartRecording["state"] = "normal"
+    btnStopRecording["state"] = "disabled"
+    saveVideo()
+    
+def saveVideo():
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    print(SCREEN_SIZE)
+    output = cv2.VideoWriter("output.avi",fourcc,float(FPS),(SCREEN_SIZE))
+    converted = convertScreenShots(frames)
+    outputVideo(output,converted)
+    output.release()
+
+FPS = 0
 SCREEN_SIZE = pyautogui.size()
-fourcc = cv2.VideoWriter_fourcc(*"XVID")
-videoLength = 1
-#converted = convertScreenShots(recorded)
 #outputVideo(output,converted)
 cv2.destroyAllWindows()
 #output.release()
@@ -58,7 +75,7 @@ fpsSettings.place(x=90, y=80,width = 115)
 btnStartRecording = tk.Button(window, text = "Start Recording",command = startRecording)
 btnStartRecording.place(x=90, y=120)
 
-btnStopRecording = tk.Button(window, text = "Stop Recording")
+btnStopRecording = tk.Button(window, text = "Stop Recording", command = stopRecording)
 btnStopRecording.place(x=90,y=160)
 btnStopRecording["state"] = "disabled"
 
