@@ -3,16 +3,28 @@ import numpy as np
 import pyautogui
 import tkinter as tk
 import threading
+import time
+from PIL import Image
+from mss import mss
 
 keepRecording = False
 frames = []
 
 def _recordScreen():
-    global frames
+    global frames,FPS, monitor
+    timeForFrame = 1/float(FPS)
     frames = []
+    sct = mss()
+    startTimer = time.time()
+    currentTimer = time.time()
     while keepRecording == True:
-        img = pyautogui.screenshot()
+        if(currentTimer-startTimer>1):
+            print(len(frames))
+            startTimer = currentTimer
+        currentTimer = time.time()
+        img = np.array(sct.grab(monitor))
         frames.append(img)
+        
 def recordScreen():
     threading.Thread(target=_recordScreen).start()
 def convertScreenShots(screenShots):
@@ -53,6 +65,7 @@ def saveVideo():
 
 FPS = 0
 SCREEN_SIZE = pyautogui.size()
+monitor = {"top":0,"left":0,"width":SCREEN_SIZE[0],"height":SCREEN_SIZE[1]}
 #outputVideo(output,converted)
 cv2.destroyAllWindows()
 #output.release()

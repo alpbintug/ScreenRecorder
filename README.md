@@ -2,14 +2,23 @@
 A screen recorder that I created to record my screen, because why pay for some random applications when you create one, right?
 
 ### TO-DO
-'''
-- Create a GUI to help user start and stop recording (DONE)
-- Give user FPS options (DONE)
+
+- IMPROVE PERFORMANCE (URGENT!)
+    ```
+    Right now program cannot handle high frame rates gets 30ish frames with my i7 8750H CPU
+    How can I solve this?
+    ---Maybe I can run screen capturing functions on GPU
+    ---Maybe I can create false frames after capturing to mimic the frame rates
+    ```
 - Give user resolution options
 - Record computer audio synched with FPS and merge this with video file
 - Create a GUI element to help user name the recorded video and specify save location
 - Add a timer to show user recorded video length while recording
-'''
+
+### TO-Done
+- Create a GUI to help user start and stop recording (DONE)
+- Give user FPS options (DONE)
+
 
 ## Prerequisites
 
