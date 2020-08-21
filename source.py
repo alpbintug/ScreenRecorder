@@ -11,31 +11,31 @@ from numba import jit
 keepRecording = False
 frames = []
 
-        
-def recordScreen():
-    
-    global frames,FPS, monitor
-    frames = []
+
+def startRecording():
+    global keepRecording, FPS,frames
+    btnStartRecording["state"] = "disabled"
+    btnStopRecording["state"] = "normal"
+    X = fpsSettings.current()
+    FPS = float(X*5+10)
+    print(FPS)
+    window.iconify()
+    keepRecording = True
     threading.Thread(target=_recordScreen,args=[FPS]).start()
 def _recordScreen(FPS):
+    global frames, monitor
+    frames = []
     timeForFrame = 1/FPS
     sct = mss()
     startTimer = time.time()
     currentTimer = time.time()
-    #t_getScreenShot = threading.Timer(timeForFrame,_getScreenShot,args=[sct])
-    #t_getScreenShot.start()
     while keepRecording == True:
-        threading.Thread(target=_getScreenShot,args=[sct]).start()
         if(currentTimer-startTimer>1):
             print(len(frames))
             startTimer = currentTimer
         currentTimer = time.time()
-        #threading.Thread(target=_getScreenShot,args=[sct]).start()
-    #t_getScreenShot.cancel()
-def _getScreenShot(sct):
-    global frames, monitor
-    img = np.array(sct.grab(monitor))
-    frames.append(img)
+        img = np.array(sct.grab(monitor))
+        frames.append(img)
 def convertScreenShots(screenShots):
     converted = []
     for i in range(len(screenShots)):
@@ -48,33 +48,23 @@ def outputVideo(output, screenShots):
     for i in range(len(screenShots)):
         output.write(screenShots[i])
 
-def startRecording():
-    global keepRecording, FPS
-    btnStartRecording["state"] = "disabled"
-    btnStopRecording["state"] = "normal"
-    X = fpsSettings.current()
-    FPS = float(X*5+10)
-    print(FPS)
-    window.iconify()
-    keepRecording = True
-    recordScreen()
 
 def stopRecording():
-    global keepRecording, FPS, SCREEN_SIZE
+    global keepRecording, btnStartRecording,btnStopRecording
     keepRecording = False
     btnStartRecording["state"] = "normal"
     btnStopRecording["state"] = "disabled"
     saveVideo()
     
 def saveVideo():
-    global frames
+    global frames,SCREEN_SIZE, FPS
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     print(SCREEN_SIZE)
     output = cv2.VideoWriter("output.avi",fourcc,FPS,(SCREEN_SIZE))
     converted = convertScreenShots(frames)
-    frames = []
     outputVideo(output,converted)
     output.release()
+    frames = []
 
 FPS = 0.0
 SCREEN_SIZE = pyautogui.size()
