@@ -7,7 +7,7 @@ import time
 from PIL import Image
 from mss import mss
 
-keepRecording = False
+cpdef bint keepRecording = False
 frames = []
 
 def _recordScreen():
@@ -24,10 +24,6 @@ def _recordScreen():
         currentTimer = time.time()
         img = np.array(sct.grab(monitor))
         frames.append(img)
-def _getScreenShot():
-    global frames
-    img = np.array(sct.grab(monitor))
-    frames.append(img)
         
 def recordScreen():
     threading.Thread(target=_recordScreen).start()
@@ -47,6 +43,7 @@ def startRecording():
     global keepRecording, FPS
     btnStartRecording["state"] = "disabled"
     btnStopRecording["state"] = "normal"
+    cpdef int X
     X = fpsSettings.current()
     FPS = float(X*5+10)
     print(FPS)
@@ -69,7 +66,7 @@ def saveVideo():
     outputVideo(output,converted)
     output.release()
 
-FPS = 0.0
+cpdef float FPS = 0.0
 SCREEN_SIZE = pyautogui.size()
 monitor = {"top":0,"left":0,"width":SCREEN_SIZE[0],"height":SCREEN_SIZE[1]}
 #outputVideo(output,converted)
