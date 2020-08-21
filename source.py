@@ -6,31 +6,36 @@ import threading
 import time
 from PIL import Image
 from mss import mss
+from numba import jit
 
 keepRecording = False
 frames = []
 
-def _recordScreen():
+        
+def recordScreen():
+    
     global frames,FPS, monitor
-    timeForFrame = 1/FPS
     frames = []
+    threading.Thread(target=_recordScreen,args=[FPS]).start()
+def _recordScreen(FPS):
+    timeForFrame = 1/FPS
     sct = mss()
     startTimer = time.time()
     currentTimer = time.time()
+    #t_getScreenShot = threading.Timer(timeForFrame,_getScreenShot,args=[sct])
+    #t_getScreenShot.start()
     while keepRecording == True:
+        threading.Thread(target=_getScreenShot,args=[sct]).start()
         if(currentTimer-startTimer>1):
             print(len(frames))
             startTimer = currentTimer
         currentTimer = time.time()
-        img = np.array(sct.grab(monitor))
-        frames.append(img)
-def _getScreenShot():
-    global frames
+        #threading.Thread(target=_getScreenShot,args=[sct]).start()
+    #t_getScreenShot.cancel()
+def _getScreenShot(sct):
+    global frames, monitor
     img = np.array(sct.grab(monitor))
     frames.append(img)
-        
-def recordScreen():
-    threading.Thread(target=_recordScreen).start()
 def convertScreenShots(screenShots):
     converted = []
     for i in range(len(screenShots)):
@@ -62,10 +67,12 @@ def stopRecording():
     saveVideo()
     
 def saveVideo():
+    global frames
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     print(SCREEN_SIZE)
     output = cv2.VideoWriter("output.avi",fourcc,FPS,(SCREEN_SIZE))
     converted = convertScreenShots(frames)
+    frames = []
     outputVideo(output,converted)
     output.release()
 
