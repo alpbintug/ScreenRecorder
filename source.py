@@ -61,9 +61,11 @@ def recordScreen(FPS,monitor,SCREEN_SIZE):
             print(time.time())
     
     output.release()
-@jit
 def _recordScreen(monitor,output,sct):
     img = np.array(sct.grab(monitor))
+    #THIS LINE OF CODE BREAKS AND MAKES THE CODE WORK AT THE SAME TIME
+    #wEeeeEEIIIIIIIiiiiiiRRRrrrDdddDD
+    #img is already in RGB format but I can't output it without messing the colors
     img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
     output.write(img)
 

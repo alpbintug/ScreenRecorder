@@ -7,8 +7,22 @@ A screen recorder that I created to record my screen, because why pay for some r
     ```
     Right now program cannot handle high frame rates gets 30ish frames with my i7 8750H CPU
     How can I solve this?
-    ---Maybe I can run screen capturing functions on GPU
-    ---Maybe I can create false frames after capturing to mimic the frame rates
+    
+    PROBLEMS:
+
+    ---If I store screenshots to speed up recording process, I run out of memory quickly
+    ---Taking screenshots is too slow
+    ---Processing and saving screenshots is just a bit slow
+
+    IDEAS:
+
+    ---Reduce resolution, then upscale it in post processing?
+    ---Reduce frame rate, then upscale it in post processing?
+    ---Use Windows API? WHO CARES ABOUT PORTABILITY
+    ---Maybe if I re-run the code enough times framerates will increase
+    ---JUST GO WRITE THIS IN ASSEMBLY ALREADY
+    ---Wait this makes sense
+    ---Oh boy...
     ```
 - Give user resolution options
 - Record computer audio synched with FPS and merge this with video file
