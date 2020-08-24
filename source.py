@@ -36,7 +36,7 @@ def recordScreen(FPS,monitor,SCREEN_SIZE):
     queue = Queue()
     threading.Thread(target=_recordScreen,args=[monitor,sct,queue]).start()
     threading.Thread(target=_writeScreen,args=[output,queue]).start()
-    output.release()
+    #output.release()
 
 def _recordScreen(monitor,sct,queue):
     i = 0
@@ -51,11 +51,12 @@ def _recordScreen(monitor,sct,queue):
 def _writeScreen(output, queue):
     while keepRecording == True:
         img = queue.get()
-        print(img)
         if img is None:
+            output.release()
             break
-        img = cv2.cvtColor(img,cv2.COLOR_RGBA2RGB)
+        img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
         output.write(img)
+    output.release()
 
 
 if __name__ == "__main__":
