@@ -6,7 +6,7 @@ import threading
 import time
 from PIL import Image
 from mss import mss
-from numba import jit
+from numba import njit, jit, cuda
 from multiprocessing import Queue, Process
 
 def stopRecording():
@@ -35,16 +35,23 @@ def recordScreen(FPS,monitor,SCREEN_SIZE):
     sct = mss()
     queue = Queue()
     threading.Thread(target=_recordScreen,args=[monitor,sct,queue]).start()
+    #Having more than one thread doesn't improve performance
+    #threading.Thread(target=_recordScreen,args=[monitor,sct,1,i,queue]).start()
     threading.Thread(target=_writeScreen,args=[output,queue]).start()
     #output.release()
 
+
 def _recordScreen(monitor,sct,queue):
     i = 0
+    start = current = time.time()
     while keepRecording == True:
         queue.put(np.array(sct.grab(monitor)))
         i+=1
-        if(i%30==0):
-            print(time.time(), queue.qsize())
+        if(current-start>1):
+            print(i, " frames in ", current-start, " seconds.")
+            start = current
+            i=0
+        current = time.time()
     queue.put(None)
 
 
