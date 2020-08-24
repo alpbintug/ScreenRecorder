@@ -7,25 +7,7 @@ import time
 from PIL import Image
 from mss import mss
 from numba import jit
-
-
-
-from concurrent.futures import ThreadPoolExecutor
-###################################################
-#Yukardaki kütüphaneyle Numba'yı birleştirip bi şeyler yap
-#Çok hızlı oluyomuş öyle diyolar
-###################################################
-#GLOBALLERİ KALDIR
-#DÜZGÜN KOD YAZ KÖLE
-###################################################
-#frames = [] yazmak yerine = np.zeros(SCREEN_SIZE) gibi bi şeyler dene
-#Numba'da bu daha hızlı oluyomuş
-###################################################
-
-
-
-
-
+from multiprocessing import Queue, Process
 
 def stopRecording():
     global keepRecording, btnStartRecording,btnStopRecording
@@ -46,28 +28,35 @@ def startRecording(monitor,SCREEN_SIZE):
     threading.Thread(target=recordScreen,args=[FPS,monitor,SCREEN_SIZE]).start()
 def recordScreen(FPS,monitor,SCREEN_SIZE):
     global keepRecording
-    timeForFrame = 1/FPS
-    img = np.zeros(SCREEN_SIZE)
+    #timeForFrame = 1/FPS
+    #img = np.zeros(SCREEN_SIZE)
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     output = cv2.VideoWriter("output.avi",fourcc,FPS,(SCREEN_SIZE))
     sct = mss()
+    queue = Queue()
+    threading.Thread(target=_recordScreen,args=[monitor,sct,queue]).start()
+    threading.Thread(target=_writeScreen,args=[output,queue]).start()
+    output.release()
+
+def _recordScreen(monitor,sct,queue):
     i = 0
-    thread = threading.Thread(target=_recordScreen, args=[FPS,monitor,SCREEN_SIZE])
-    thread.start()
     while keepRecording == True:
-        _recordScreen(monitor, output, sct)
+        queue.put(np.array(sct.grab(monitor)))
         i+=1
         if(i%30==0):
-            print(time.time())
-    
-    output.release()
-def _recordScreen(monitor,output,sct):
-    img = np.array(sct.grab(monitor))
-    #THIS LINE OF CODE BREAKS AND MAKES THE CODE WORK AT THE SAME TIME
-    #wEeeeEEIIIIIIIiiiiiiRRRrrrDdddDD
-    #img is already in RGB format but I can't output it without messing the colors
-    img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
-    output.write(img)
+            print(time.time(), queue.qsize())
+    queue.put(None)
+
+
+def _writeScreen(output, queue):
+    while keepRecording == True:
+        img = queue.get()
+        print(img)
+        if img is None:
+            break
+        img = cv2.cvtColor(img,cv2.COLOR_RGBA2RGB)
+        output.write(img)
+
 
 if __name__ == "__main__":
     keepRecording = False
